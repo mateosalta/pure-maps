@@ -31,19 +31,48 @@ Item {
         path: '/io/github/rinigus/PureMaps'
         service: 'io.github.rinigus.PureMaps'
 
-        xml: '  <interface name="io.github.rinigus.PureMaps">\n' +
-             '    <method name="command">\n' +
-             '       <arg name="options" direction="in" type="as"/>' +
-             '       <arg name="result" direction="out" type="s"/>' +
-             '    </method>\n' +
-             '    <method name="showPoi">\n' +
-             '       <arg name="latitude" direction="in" type="d"/>' +
-             '       <arg name="longitude" direction="in" type="d"/>' +
-             '       <arg name="result" direction="out" type="s"/>' +
-             '    </method>\n' +
-             '  </interface>\n'
+        xml:"
+<interface name='io.github.rinigus.PureMaps'>
+  <method name='Activate'>
+    <arg type='a{sv}' name='platform_data' direction='in'/>
+  </method>
+  <method name='ActivateAction'>
+    <arg type='s' name='action_name' direction='in'/>
+    <arg type='av' name='parameter' direction='in'/>
+    <arg type='a{sv}' name='platform_data' direction='in'/>
+  </method>
+  <method name='Command'>
+    <arg name='options' direction='in' type='as'/>
+    <arg name='result' direction='out' type='s'/>
+  </method>
+  <method name='Open'>
+    <arg type='as' name='uris' direction='in'/>
+  </method>
+  <method name='ShowPoi'>
+    <arg name='title' direction='in' type='s'/>
+    <arg name='latitude' direction='in' type='d'/>
+    <arg name='longitude' direction='in' type='d'/>
+    <arg name='result' direction='out' type='s'/>
+  </method>
+</interface>
+"
+        function rcActivate(platform_data) {
+            app.activate();
+            console.log( "DBUS METHOD CALLED: Open" )
+            console.log( JSON.stringify(platform_data) )
+            console.log()
+        }
 
-        function command(options) {
+        function rcActivateAction(action_name, parameter, platform_data ) {
+            app.activate();
+            console.log("DBUS METHOD CALLED: ActivateAction")
+            console.log( JSON.stringify(action_name) )
+            console.log( JSON.stringify(parameter) )
+            console.log( JSON.stringify(platform_data) )
+            console.log()
+        }
+
+        function rcCommand(options) {
             var escaped = options.map(function(s) {
                 return s.replace(".COMMA.", ",")
             })
@@ -52,9 +81,18 @@ Item {
             return "OK";
         }
 
-        function showPoi(latitude, longitude) {
+        function rcOpen( uris, platform_data ) {
+            app.activate();
+            console.log( "DBUS METHOD CALLED: Open" )
+            console.log( JSON.stringify(uris) )
+            console.log( JSON.stringify(platform_data) )
+            console.log()
+            parser( uris )
+        }
+
+        function rcShowPoi(title, latitude, longitude) {
             if (isFinite(latitude) && isFinite(longitude)) {
-                commander.showPoi(QtPositioning.coordinate(latitude, longitude));
+                commander.showPoi(QtPositioning.coordinate(latitude, longitude), title);
                 app.activate();
                 return "OK";
             }
@@ -98,9 +136,9 @@ Item {
         }
     }
 
-    function showPoi(geocoordinate) {
+    function showPoi(geocoordinate, title) {
         var radius = 50; // meters default radius
-        var p = pois.add({ "x": geocoordinate.longitude, "y": geocoordinate.latitude });
+        var p = pois.add({ "x": geocoordinate.longitude, "y": geocoordinate.latitude, "title": title });
         if (!p) return;
         pois.show(p);
         py.call("poor.app.geocoder.reverse",
@@ -111,6 +149,7 @@ Item {
                     var rpoi = pois.convertFromPython(r);
                     rpoi.poiId = p.poiId;
                     rpoi.coordinate = QtPositioning.coordinate(rpoi.y, rpoi.x);
+                    if (title) rpoi.title = title;
                     pois.update(rpoi);
                 });
         map.autoCenter = false;

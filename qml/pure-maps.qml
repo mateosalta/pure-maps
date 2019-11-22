@@ -48,7 +48,6 @@ ApplicationWindowPL {
     property bool   modalDialogBasemap: false
     property int    mode: modes.explore
     property bool   narrativePageSeen: false
-    property bool   navigationPageSeen: false
     property var    navigationStatus: NavigationStatus {}
     property bool   navigationStarted: false
     property var    notification: null
@@ -123,7 +122,6 @@ ApplicationWindowPL {
         } else if (app.mode === modes.followMe) {
 
         } else if (app.mode === modes.navigate) {
-            app.navigationPageSeen = true;
             app.navigationStarted = true;
             app.rerouteConsecutiveErrors = 0;
             app.reroutePreviousTime = -1;
@@ -359,13 +357,12 @@ ApplicationWindowPL {
         resetMenu();
         if (app._stackNavigation.keep) {
             // restore former navigation pages stack
-            app._stackNavigation.keep = false;
             app._stackNavigation.restore();
         } else {
             app._stackNavigation.clear();
             app.narrativePageSeen = false;
+            app._stackNavigation.keep = true;
             app._stackNavigation.push(Qt.resolvedUrl("NavigationPage.qml"));
-            app._stackNavigation.pushAttached(Qt.resolvedUrl("NarrativePage.qml"));
         }
     }
 

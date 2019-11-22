@@ -32,6 +32,8 @@ Alternative, is to use Flatpak-based environment and develop using
 that. For this approach, see separate
 [README](packaging/flatpak/README.md).
 
+To build a click package for Ubuntu Touch, see separate
+[README](packaging/ubports/README.md).
 
 ## Platforms
 
@@ -51,6 +53,7 @@ for example. Current platforms are
 * platform.kirigami -> make target `platform-kirigami`
 * platform.qtcontrols -> make target `platform-qtcontrols`
 * platform.silica -> make target `platform-silica`
+* platform.ubports -> make target `platform-ubports`
 
 Within platform-independent code, platform is included allowing to
 access platform-specific implementations of page stack, file dialog,
@@ -76,6 +79,7 @@ are needed:
 * Mapbox GL Native, Qt version, use the packaged version at https://github.com/rinigus/pkg-mapbox-gl-native
 * Mapbox GL QML, unofficial QML bindings, https://github.com/rinigus/mapbox-gl-qml
 * [non-Sailfish] QML runner https://github.com/rinigus/qmlrunner
+* [qtcontrols, kirigami] QML Clipboard module https://github.com/rinigus/qml-module-clipboard
 * GPXPy, https://github.com/tkrajina/gpxpy
 
 When developing with Kirigami using flatpak builder, dependencies will
@@ -128,8 +132,8 @@ tiles for Finland), Sputnik (raster tiles in Russian), Photon
 
 ## Packaging
 
-At present, Sailfish OS version is packaged as RPM and Linux version
-is packaged using Flatpak.
+At present, Sailfish OS version is packaged as RPM, Linux version
+is packaged using Flatpak, and UBPorts version as click.
 
 For packaging, please copy `tools/apikeys_dummy.py` to
 `tools/apikeys.py` and fill missing API keys for the services that you
@@ -139,7 +143,9 @@ For installation on Sailfish, you can build the RPM package with
 command `make rpm`. You don't need an SDK to build the RPM, only basic
 tools: `make`, `rpmbuild`, `gettext` and `qttools`.
 
-Flatpak specific instructions are available under `packaging/flatpak`.
+Flatpak specific instructions are available under `packaging/flatpak`. 
+
+UBPorts specific instructions are available under `packaging/ubports`.
 
 
 ## Platform specific notes

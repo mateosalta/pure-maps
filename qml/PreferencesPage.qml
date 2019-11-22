@@ -330,7 +330,7 @@ PagePL {
 
                     ComboBoxPL {
                         id: mapmatchingComboBox
-                        description: app.tr("Select mode of transportation. Only applies when Pure Maps is not navigating.")
+                        description: app.tr("Select mode of transportation. Only applies when Pure Maps is not navigating. Uses OSM Scout Server for its operation.")
                         label: app.tr("Snap position to road")
                         model: [ app.tr("None"), app.tr("Car"), app.tr("Bicycle"), app.tr("Foot") ]
                         visible: app.hasMapMatching
@@ -517,6 +517,24 @@ PagePL {
                         }
                     }
 
+                    TextSwitchPL {
+                        checked: app.conf.mapModeCleanShowNavigationStartPause
+                        text: app.tr("Navigation Start/Pause")
+                        onCheckedChanged: {
+                            if (app.conf.mapModeCleanShowNavigationStartPause!==checked)
+                                app.conf.set("map_mode_clean_show_navigation_start_pause", checked);
+                        }
+                    }
+
+                    TextSwitchPL {
+                        checked: app.conf.mapModeCleanShowNavigationClear
+                        text: app.tr("Navigation Clear Route")
+                        onCheckedChanged: {
+                            if (app.conf.mapModeCleanShowNavigationClear!==checked)
+                                app.conf.set("map_mode_clean_show_navigation_clear", checked);
+                        }
+                    }
+
                     Spacer {
                         height: styler.themePaddingLarge
                     }
@@ -573,6 +591,7 @@ PagePL {
                     TextSwitchPL {
                         id: mapmatchingSwitch
                         checked: app.conf.mapMatchingWhenNavigating
+                        description: app.tr("Uses OSM Scout Server for its operation.")
                         text: app.tr("Snap position to road")
                         visible: app.hasMapMatching
                         onCheckedChanged: {
@@ -641,7 +660,7 @@ PagePL {
 
                         ComboBoxPL {
                             id: speedLimitComboBox
-                            description: app.tr("Show speed limit sign")
+                            description: app.tr("Show speed limit sign. Requires snapping position to the road to find the speed limit.")
                             enabled: mapmatchingSwitch.checked
                             label: app.tr("Speed limit")
                             model: [ app.tr("Always"), app.tr("Only when exceeding"), app.tr("Never") ]
@@ -781,9 +800,9 @@ PagePL {
                             description.text = app.tr("No engine available for selected language.\n\n" +
                                                       "Pure Maps supports Mimic, Flite, PicoTTS, and " +
                                                       "Espeak TTS engines. Unless you are using Pure Maps " +
-                                                      "through Flatpak, the engines have to be installed " +
-                                                      "separately. Sailfish OS users can find the engines " +
-                                                      "at OpenRepos.");
+                                                      "through Flatpak or OpenStore, the engines have " +
+                                                      "to be installed separately. Sailfish OS users " +
+                                                      "can find the engines at OpenRepos.");
                         }
 
                         if (!py.evaluate("poor.app.voice_tester.active")) return;

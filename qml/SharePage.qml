@@ -47,18 +47,16 @@ PagePL {
             anchors.horizontalCenter: parent.horizontalCenter
             text: app.tr("SMS")
             onClicked: {
-                // XXX: SMS links don't work without a recipient.
-                // https://together.jolla.com/question/84134/
-                clipboard.copy(page.formatMessage(false));
-                infoLabel.text = [
-                            app.tr("Message copied to the clipboard"),
-                            app.tr("Launching the Messages application"),
-                        ].join("\n");
-                py.call("poor.util.popen", [
-                            "/usr/bin/invoker",
-                            "--type=silica-qt5",
-                            "/usr/bin/jolla-messages",
-                        ], null);
+                var m = app.sendSms(page.formatMessage(false));
+                if (m) {
+                    var msgs = [
+                                app.tr("Launching the Messages application"),
+                                app.tr("Message copied to the clipboard")
+                            ];
+                    infoLabel.text =
+                            m.map(function (i) { return msgs[i]; }).join('\n');
+                } else
+                    infoLabel.text = app.tr("Error sending message");
             }
         }
 

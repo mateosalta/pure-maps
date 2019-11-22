@@ -42,12 +42,14 @@ URL_REVERSE = ("http://api.opencagedata.com/geocode/v1/json"
 
 cache = {}
 
-def geocode(query, params):
+def geocode(query, x=0, y=0, params={}):
     """Return a list of dictionaries of places matching `query`."""
     query = urllib.parse.quote_plus(query)
     limit = params.get("limit", 10)
     lang = poor.util.get_default_language("en")
     url = URL.format(**locals())
+    if x and y:
+        url += "&proximity={:.3f},{:.3f}".format(y,x)
     with poor.util.silent(KeyError):
         return copy.deepcopy(cache[url])
     results = poor.http.get_json(url)["results"]
@@ -93,7 +95,7 @@ def parse_type(result):
         return type.capitalize()
     return ""
 
-def reverse(x, y, radius, limit, params):
+def reverse(x, y, radius, limit=1, params={}):
     """Return a list of dictionaries of places nearby given coordinates."""
     lng = x
     lat = y

@@ -1,3 +1,48 @@
+2019-10-04: Pure Maps 1.26
+==========================
+
+* Update Navigation and Follow Me mode GUI
+* Link to UBPorts documentation [jonnius]
+* Add transportation icons [mosen]
+* [silica] Keep text field focus after pressing clear button
+* [1.26.0, 1.26.1] Update translations
+* Bugfixes
+
+2019-09-14: Pure Maps 1.25
+==========================
+
+* Optional DBus activation [based on xXSparkeyy's work]
+* Search function has current location bias (online providers)
+* [silica] Fixing geo handler [based on xXSparkeyy's work]
+* [qtcontrols,kirigami] Add clipboard support for location sharing
+* [ubports] Fixes in packaging scripts [jonnius]
+* Attribution button redesign
+* [qtcontrols,kirigami] Improve fallback icons loading
+* [1.25.0, 1.25.1] Update translations
+* [1.25.0, 1.25.1, 1.25.2] Bugfixes
+
+2019-08-26: Pure Maps 1.24
+==========================
+
+* Add UBPorts platform
+* Package and bugfixes for UBPorts [jonnius, myii, mateosalta]
+* [silica] Use image instead of iconbutton
+* Update translations
+* Bugfixes
+
+2019-08-25: Pure Maps 1.23
+==========================
+
+* Allow to enable/disable smooth position animation
+* Add basemap icons [Mosen]
+* Stop keepalive, GPS, and timers on shutdown
+* [silica] Add cover actions for navigation
+* Allow to specify platform-specific mechanism for sending SMS
+* Update translations
+* Update documentation
+* Bugfixes
+
+
 2019-07-29: Pure Maps 1.22
 ==========================
 

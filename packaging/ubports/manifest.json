@@ -1,5 +1,5 @@
 {
-    "name": "pure-maps.jonius",
+    "name": "pure-maps.jonnius",
     "description": "Maps and Navigation",
     "architecture": "armhf",
     "title": "Pure Maps",
@@ -9,7 +9,7 @@
             "desktop":  "pure-maps.desktop"
         }
     },
-    "version": "0.1.0",
+    "version": "1.26.1",
     "maintainer": "Jonatan Hatakeyama Zeidler <jonatan_zeidler@gmx.de>",
     "framework" : "ubuntu-sdk-16.04"
 }

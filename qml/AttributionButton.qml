@@ -19,36 +19,92 @@
 import QtQuick 2.0
 import "platform"
 
-IconButtonPL {
+MouseArea {
     id: attributionButton
-    anchors.left: parent.left
-    anchors.leftMargin: styler.themePaddingLarge
-    anchors.top: navigationBlock.bottom
+    anchors.left: scaleBar.right
+    anchors.leftMargin: 0
+    anchors.top: referenceBlockTopLeft.bottom
     anchors.topMargin: styler.themePaddingLarge
-    iconHeight: styler.themeIconSizeSmall
-    iconSource: app.getIcon("icons/attribution/default")
-    padding: 0
+    height: styler.themeIconSizeSmall
     states: [
         State {
-            when: !app.portrait && navigationBlockLandscapeLeftShield.height > 0
+            when: app.mode===modes.navigate && !app.portrait
             AnchorChanges {
                 target: attributionButton
-                anchors.top: navigationBlockLandscapeLeftShield.bottom
+                anchors.left: referenceBlockTopLeft.right
+                anchors.top: referenceBlockTop.bottom
+            }
+            PropertyChanges {
+                target: attributionButton
+                anchors.leftMargin: styler.themePaddingLarge
+            }
+        },
+        State {
+            when: scaleBar.opacity < 1e-5 || app.mode === modes.navigate || app.mode === modes.followMe
+            AnchorChanges {
+                target: attributionButton
+                anchors.left: parent.left
+                anchors.top: referenceBlockTopLeft.bottom
+            }
+            PropertyChanges {
+                target: attributionButton
+                anchors.leftMargin: styler.themePaddingLarge
             }
         }
+
     ]
+    width: extra.width + main.width
     z: 500
 
     property string logo: ""
 
-    onClicked: app.push(Qt.resolvedUrl("AttributionPage.qml"), {}, true)
-    onLogoChanged: attributionButton.iconSource = logo ?
-        app.getIcon("icons/attribution/%1".arg(logo)) : "";
+    IconButtonPL {
+        id: extra
+        anchors.left: parent.left
+        anchors.top: parent.top
+        iconHeight: parent.height
+        padding: 0
 
-    Connections {
-        target: styler
-        onIconVariantChanged: attributionButton.iconSource = attributionButton.logo ?
-                                  app.getIcon("icons/attribution/%1".arg(attributionButton.logo)) : "";
+        Connections {
+            target: styler
+            onIconVariantChanged: extra.setSource()
+        }
+
+        Component.onCompleted: setSource()
+        onClicked: attributionButton.pushPage()
+
+        function setSource() {
+            if (logo && logo !== "default") {
+                extra.iconSource = app.getIcon("icons/attribution/%1".arg(logo));
+                extra.visible = true;
+            } else {
+                extra.iconSource = "";
+                extra.visible = false;
+            }
+        }
     }
 
+    IconButtonPL {
+        id: main
+        anchors.left: extra.right
+        anchors.leftMargin: extra.visible ? styler.themePaddingMedium : 0
+        anchors.top: parent.top
+        iconHeight: parent.height
+        iconSource: app.getIcon("icons/attribution/default")
+        padding: 0
+
+        Connections {
+            target: styler
+            onIconVariantChanged: main.iconSource = app.getIcon("icons/attribution/default")
+        }
+
+        onClicked: attributionButton.pushPage()
+    }
+
+    onClicked: pushPage()
+    onLogoChanged: extra.setSource()
+
+    function pushPage() {
+        app.push(Qt.resolvedUrl("AttributionPage.qml"), {}, true);
+    }
 }

@@ -42,7 +42,7 @@ Kirigami.ApplicationWindow {
     property var    pages: StackPL { }
     property bool   running: visible
     property int    screenHeight: height
-    property bool   screenLarge: true
+    property bool   screenLarge: false
     property int    screenWidth: width
     property bool   keepAlive: false // not used - desktop is not expected to be falling asleep
 
@@ -81,6 +81,10 @@ Kirigami.ApplicationWindow {
         }
     }
 
+    function sendSms(text) {
+        console.log("Sending SMS is not implemented");
+    }
+    
     function showMainMenu() {
         globalDrawer.open();
     }

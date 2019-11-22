@@ -31,14 +31,14 @@ ApplicationWindow {
     property alias  initialPage: pageStack.initialItem
     property string menuPageUrl
     property var    pages: StackPL { }
-    property bool   running: visible
+    property bool   running: Qt.application.state === Qt.ApplicationActive
     property int    screenHeight: height
-    property bool   screenLarge: true
+    property bool   screenLarge: false
     property int    screenWidth: width
     property bool   keepAlive: false
 
     ScreenSaver {
-        screenSaverEnabled: !(Qt.application.active && keepAlive)
+        screenSaverEnabled: !(Qt.application.state === Qt.ApplicationActive && keepAlive)
     }
 
     StackView {
@@ -69,6 +69,12 @@ ApplicationWindow {
     }
 
     function initPages() {
+    }
+
+    function sendSms(text) {
+        var link = "message:///?text=%1".arg(text)
+        Qt.openUrlExternally(link);
+        return [0];
     }
 
     function showMainMenu() {

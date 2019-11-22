@@ -2,21 +2,29 @@
 
 NAME       = pure-maps
 FULLNAME   = $(NAME)
-VERSION    = 1.22.0
+VERSION    = 1.26.1
 RELEASE    = $(NAME)-$(VERSION)
 DESTDIR    =
 PREFIX     = /usr
 EXEDIR     = $(DESTDIR)$(PREFIX)/bin
 EXE        = $(EXEDIR)/$(NAME)
+EXEDIRREAL = $(PREFIX)/bin
+EXEREAL    = $(EXEDIRREAL)/$(NAME)
 DATADIR    = $(DESTDIR)$(PREFIX)/share/$(FULLNAME)
 DESKTOPDIR = $(DESTDIR)$(PREFIX)/share/applications
+DBUSDIR    = $(DESTDIR)$(PREFIX)/share/dbus-1/services
 ICONDIR    = $(DESTDIR)$(PREFIX)/share/icons/hicolor
 METADIR    = $(DESTDIR)$(PREFIX)/share/metainfo
 LANGS      = $(basename $(notdir $(wildcard po/*.po)))
 LCONVERT   = $(or $(wildcard /usr/lib/qt5/bin/lconvert),\
-                  $(wildcard /bin/lconvert),\
-                  $(wildcard /usr/bin/lconvert),\
-                  $(wildcard /usr/lib/*/qt5/bin/lconvert))
+		  $(wildcard /bin/lconvert),\
+		  $(wildcard /usr/bin/lconvert),\
+		  $(wildcard /usr/lib/*/qt5/bin/lconvert))
+QMLRUNNER = qmlrunner -P INSTALL_PREFIX/share FULL_NAME
+QT_PLATFORM_STYLE =
+QT_PLATFORM_FALLBACK_STYLE =
+TMP_AS_CACHE =
+INSTALL_DBUSACT = no
 
 define install-translation =
     # GNU gettext translations for Python use.
@@ -52,19 +60,14 @@ dist:
 
 flathub-install-general:
 	tools/manage-keys inject . || true
-	$(MAKE) install
-	mkdir -p $(PREFIX)/share/applications
-	mkdir -p $(PREFIX)/share/appdata
-	mkdir -p $(PREFIX)/usr
-	install -D packaging/flatpak/io.github.rinigus.PureMaps $(PREFIX)/bin/io.github.rinigus.PureMaps
-	install -D packaging/flatpak/osmscout-server $(PREFIX)/bin/osmscout-server
-	install -D packaging/flatpak/io.github.rinigus.PureMaps.desktop $(PREFIX)/share/applications
-	sed 's/binary>pure-maps/binary>io.github.rinigus.PureMaps/' packaging/pure-maps.appdata.xml > $(PREFIX)/share/appdata/io.github.rinigus.PureMaps.appdata.xml
-        # workaround https://github.com/hughsie/appstream-glib/issues/271
-	ln -s $(PREFIX)/share $(PREFIX)/usr
-	mv $(PREFIX)/share/pure-maps/qml/pure-maps.qml $(PREFIX)/share/pure-maps/qml/io.github.rinigus.PureMaps.qml
-	rename pure-maps io.github.rinigus.PureMaps $(PREFIX)/share/pure-maps/translations/*.qm
-	mv $(PREFIX)/share/pure-maps $(PREFIX)/share/io.github.rinigus.PureMaps
+	$(MAKE) QMLRUNNER="/app/bin/qmlrunner -P INSTALL_PREFIX/share FULL_NAME" NAME=io.github.rinigus.PureMaps install
+	mkdir -p $(DESKTOPDIR)
+	mkdir -p $(DESTDIR)$(PREFIX)/share/appdata
+	mkdir -p $(DESTDIR)$(PREFIX)/usr
+	install -D packaging/flatpak/osmscout-server $(DESTDIR)$(PREFIX)/bin/osmscout-server
+	sed 's/binary>pure-maps/binary>io.github.rinigus.PureMaps/' packaging/pure-maps.appdata.xml > $(DESTDIR)$(PREFIX)/share/appdata/io.github.rinigus.PureMaps.appdata.xml
+	# workaround https://github.com/hughsie/appstream-glib/issues/271
+	ln -s $(PREFIX)/share $(DESTDIR)$(PREFIX)/usr
 
 flathub-install-kirigami: platform-kirigami flathub-install-general
 	echo "Kirigami flathub install done"
@@ -126,6 +129,8 @@ endif
 	cp qml/icons/position/*.png $(DATADIR)/qml/icons/position
 	mkdir -p $(DATADIR)/qml/icons/sailfishos
 	cp qml/icons/sailfishos/*.svg $(DATADIR)/qml/icons/sailfishos
+	mkdir -p $(DATADIR)/qml/icons/ubports
+	cp qml/icons/ubports/*.svg $(DATADIR)/qml/icons/ubports
 	mkdir -p $(DATADIR)/qml/js
 	cp qml/js/*.js $(DATADIR)/qml/js
 	mkdir -p $(DATADIR)/qml/platform
@@ -156,17 +161,37 @@ endif
 	cp routers/digitransit/*.svg $(DATADIR)/routers/digitransit
 	@echo "Installing fallback icons..."
 	mkdir -p $(DATADIR)/icons
-	cp -r qml/icons/fallback/*.svg $(DATADIR)/icons
+	cp qml/icons/fallback/*.svg $(DATADIR)/icons
 	@echo "Installing translations..."
 	$(foreach lang,$(LANGS),$(call install-translation,$(lang)))
 	@echo "Installing desktop file..."
 	mkdir -p $(DESKTOPDIR)
 	cp data/$(NAME).desktop $(DESKTOPDIR) || cp data/pure-maps.desktop $(DESKTOPDIR)/$(NAME).desktop || true
+	sed -i -e 's|EXE|$(EXEREAL)|g' $(DESKTOPDIR)/$(NAME).desktop || true
+	sed -i -e 's|NAME|$(NAME)|g' $(DESKTOPDIR)/$(NAME).desktop || true
+	@echo "Installing extra desktop files if available..."
+	cp data/$(NAME)-*.desktop $(DESKTOPDIR) || true
+ifeq ($(INSTALL_DBUSACT),yes)
+	@echo "Installing DBus service file..."
+	mkdir -p $(DBUSDIR)
+	cp data/io.github.rinigus.PureMaps.service $(DBUSDIR) || true
+	sed -i -e 's|EXE|$(EXEREAL)|g' $(DBUSDIR)/io.github.rinigus.PureMaps.service || true
+endif
 	@echo "Installing executable file..."
 	mkdir -p $(EXEDIR)
 	cp data/$(NAME) $(EXE) || cp data/pure-maps $(EXE) || true
+	sed -i -e 's|QMLRUNNER|$(QMLRUNNER)|g' $(EXE) || true
 	sed -i -e 's|INSTALL_PREFIX|$(PREFIX)|g' $(EXE) || true
 	sed -i -e 's|FULL_NAME|$(FULLNAME)|g' $(EXE) || true
+ifdef QT_PLATFORM_STYLE
+	sed -i -e 's|# INSERT_PLATFORM_STYLE|export QT_QUICK_CONTROLS_STYLE="$$\{QT_QUICK_CONTROLS_STYLE:-$(QT_PLATFORM_STYLE)\}"|g' $(EXE) || true
+endif
+ifdef QT_PLATFORM_FALLBACK_STYLE
+	sed -i -e 's|# INSERT_PLATFORM_FALLBACK_STYLE|export QT_QUICK_CONTROLS_FALLBACK_STYLE="$$\{QT_QUICK_CONTROLS_FALLBACK_STYLE:-$(QT_PLATFORM_FALLBACK_STYLE)\}"|g' $(EXE) || true
+endif
+ifdef TMP_AS_CACHE
+	sed -i -e 's|# INSERT_TMP_AS_CACHE|USE_CACHE_AS_TMP="yes"|g' $(EXE) || true
+endif
 	@echo "Installing appdata file..."
 	mkdir -p $(METADIR)
 	cp packaging/pure-maps.appdata.xml $(METADIR)/$(NAME).appdata.xml || true
@@ -200,7 +225,7 @@ pot:
 	tools/update-translations
 
 rpm-silica:
-	$(MAKE) NAME=harbour-pure-maps .rpm-silica-imp
+	$(MAKE) NAME=harbour-pure-maps QMLRUNNER="sailfish-qml FULL_NAME" .rpm-silica-imp
 
 .rpm-silica-imp:
 	$(MAKE) platform-silica

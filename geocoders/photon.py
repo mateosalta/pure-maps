@@ -29,23 +29,26 @@ URL = "http://photon.komoot.de/api/?q={query}&limit={limit}&lang={lang}"
 URL_REVERSE = "http://photon.komoot.de/reverse?lon={lon}&lat={lat}&limit={limit}&lang={lang}&distance_sort=true"
 cache = {}
 
-def autocomplete(query, x, y, params):
+def autocomplete(query, x=0, y=0, params={}):
     """Return a list of autocomplete dictionaries matching `query`."""
     if len(query) < 3: return []
     key = "autocomplete:{}".format(query)
     with poor.util.silent(KeyError):
         return copy.deepcopy(cache[key])
-    results = geocode(query, params)
+    results = geocode(query=query, x=x, y=y, params=params)
     cache[key] = copy.deepcopy(results)
     return results
 
-def geocode(query, params):
+def geocode(query, x=0, y=0, params={}):
     """Return a list of dictionaries of places matching `query`."""
     query = urllib.parse.quote_plus(query)
     limit = params.get("limit", 10)
     lang = poor.util.get_default_language("en")
     lang = (lang if lang in ("de", "en", "it", "fr") else "en")
     url = URL.format(**locals())
+    if x and y:
+        url += "&lon={:.3f}".format(x)
+        url += "&lat={:.3f}".format(y)
     with poor.util.silent(KeyError):
         return copy.deepcopy(cache[url])
     results = poor.http.get_json(url)["features"]
@@ -125,7 +128,7 @@ def parse_type(result):
             items.append(result.properties.osm_value.capitalize())
     return ", ".join(items).strip()
 
-def reverse(x, y, radius, limit, params):
+def reverse(x, y, radius, limit=1, params={}):
     """Return a list of dictionaries of places nearby given coordinates."""
     lon = x
     lat = y

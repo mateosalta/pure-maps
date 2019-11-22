@@ -78,7 +78,7 @@ class Geocoder:
             olc_isFull(query.strip())):
             return []
         try:
-            results = self._provider.autocomplete(query, x, y, params)
+            results = self._provider.autocomplete(query=query, x=x, y=y, params=params)
         except Exception:
             print("Autocomplete failed:", file=sys.stderr)
             traceback.print_exc()
@@ -93,7 +93,7 @@ class Geocoder:
         bearing  = poor.util.calculate_bearing(x1, y1, x2, y2)
         return poor.util.format_distance_and_bearing(distance, bearing)
 
-    def geocode(self, query, params=None, x=0, y=0):
+    def geocode(self, query, x=0, y=0, params=None):
         """
         Return a list of dictionaries of places matching `query`.
 
@@ -138,7 +138,7 @@ class Geocoder:
                          provider=self.id)]
 
         try:
-            results = self._provider.geocode(query, params)
+            results = self._provider.geocode(query=query, x=x, y=y, params=params)
         except socket.timeout:
             return dict(error=True, message=_("Connection timed out"))
         except Exception:
@@ -175,7 +175,7 @@ class Geocoder:
         params = params or {}
 
         try:
-            results = self._provider.reverse(x, y, radius, limit, params)
+            results = self._provider.reverse(x=x, y=y, radius=radius, limit=limit, params=params)
         except socket.timeout:
             return dict(error=True, message=_("Connection timed out"))
         except Exception:
